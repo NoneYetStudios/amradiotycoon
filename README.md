@@ -48,9 +48,15 @@ php -S localhost:8000
 
 Then open `http://localhost:8000` in your browser.
 
+You can also run with python:
+
+```bash
+python -m http.server 8000
+```
+
 > **Note:** PHP's built-in server does not process `.htaccess` files; Apache is required in production for those rules to apply.
 
-## Deploying to JetHost
+## Deploying to JetHost (or similar web host)
 
 No build step or package manager is required. Upload the project files to your JetHost web root (or a subdirectory such as `public_html/amradiotycoon/`):
 
@@ -67,3 +73,9 @@ No build step or package manager is required. Upload the project files to your J
    - Ensure `data/` is writable by PHP (typically `0755` on cPanel/JetHost suPHP, or `0775` if needed).
 4. **Verify `.htaccess` protection:**
    - Confirm hidden files (`.htaccess` and `data/.htaccess`) were uploaded so `data/leaderboard.sqlite` cannot be downloaded directly via HTTP.
+
+---
+
+## License
+
+MIT License © 2026 Anthony Moore / None Yet Studios
