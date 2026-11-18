@@ -1,0 +1,23 @@
+# Runtime SQLite database & logs (auto-created in data/)
+*.sqlite
+*.sqlite-wal
+*.sqlite-shm
+*.sqlite3
+*.db
+*.log
+error_log
+php_errorlog
+
+# Environment & local config
+.env
+.env.*
+
+# OS & editor files
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/
+*.swp
+*.swo
+*~

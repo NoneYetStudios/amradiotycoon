@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AM Radio Tycoon — The 25-Year Station Manager Career | STF Arcade</title>
+  <meta name="description" content="Guide WSTF 1120 AM from a tiny small-town transmitter to a 25-year broadcasting legend in AM Radio Tycoon, an STF Arcade management simulation." />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div id="app">
+    <!-- Persistent Top Console Header -->
+    <header id="topbar">
+      <div class="topbar-left">
+        <a id="stfArcadeBtn" class="stf-arcade-btn" href="https://stabthefinger.com/stfarcade.html" title="Back to STF Arcade">
+          ← STF ARCADE
+        </a>
+        <div id="stationIdentity" class="station-identity hidden">
+          <span class="badge-on-air"><span class="pulse-dot"></span> ON AIR</span>
+          <strong id="hdrStation">WSTF 1120 AM</strong>
+          <span class="sep">•</span>
+          <span class="hdr-tagline">"The Voice of Somewhere"</span>
+          <span class="sep">•</span>
+          <span class="hdr-mgr">Mgr: <b id="hdrManager">—</b></span>
+        </div>
+      </div>
+
+      <div class="topbar-right">
+        <div id="hdrCalendar" class="hdr-calendar hidden">
+          <span id="hdrMonthYear">JANUARY 1994</span>
+          <span class="hdr-turn" id="hdrTurn">YEAR 1/25 • MO 1/300</span>
+        </div>
+        <button id="btnHdrBoard" class="btn btn-sm btn-ghost" type="button" title="Open Leaderboard">🏆 Leaderboard</button>
+        <button id="btnHdrSfx" class="btn btn-sm btn-ghost" type="button" title="Toggle Retro Studio SFX">🔊 SFX: ON</button>
+        <button id="btnHdrMenu" class="btn btn-sm btn-ghost hidden" type="button" title="Return to Title Screen">Menu</button>
+      </div>
+    </header>
+
+    <!-- =========================================================
+         TITLE / STARTUP SCREEN
+         ========================================================= -->
+    <main id="screen-title" class="screen active">
+      <section class="title-hero">
+        <div class="dial-strip" aria-hidden="true">
+          <span>540</span><span>680</span><span>820</span><span>980</span>
+          <span class="dial-active">1120 AM</span>
+          <span>1290</span><span>1470</span><span>1620 kHz</span>
+        </div>
+        <div class="eyebrow">STF ARCADE BROADCASTING SIMULATION</div>
+        <h1 class="game-title">AM RADIO TYCOON</h1>
+        <p class="game-subtitle">"The 25-Year Station Manager Career"</p>
+        <p class="game-pitch">
+          Take the reins of a sputtering small-town AM frequency with aging tubes, modest cash, and questionable local talent.
+          Survive 300 months of chaotic broadcasts, suspicious weather balloons, feral goats, and federal compliance inspections.
+        </p>
+
+        <!-- Fresh Career Panel (No Active Save) -->
+        <div id="title-fresh" class="title-card">
+          <div class="title-actions">
+            <button id="btnFreshNew" class="btn btn-primary btn-lg" type="button">🎙️ NEW CAREER</button>
+            <button id="btnFreshBoard" class="btn btn-secondary btn-lg" type="button">🏆 LEADERBOARD</button>
+          </div>
+        </div>
+
+        <!-- Returning Player Panel (Active Save Exists) -->
+        <div id="title-returning" class="title-card hidden">
+          <div class="save-badge">ACTIVE BROADCAST CAREER FOUND</div>
+          <div class="save-summary-grid">
+            <div class="save-field"><span class="lbl">Manager</span><b id="saveMgr">—</b></div>
+            <div class="save-field"><span class="lbl">Station</span><b id="saveStation">—</b></div>
+            <div class="save-field"><span class="lbl">Year</span><b id="saveYear">—</b></div>
+            <div class="save-field"><span class="lbl">Listeners</span><b id="saveListeners">—</b></div>
+            <div class="save-field"><span class="lbl">Cash</span><b id="saveCash">—</b></div>
+          </div>
+          <div class="title-actions">
+            <button id="btnContinue" class="btn btn-primary btn-lg" type="button">▶ CONTINUE CAREER</button>
+            <button id="btnStartNewSaved" class="btn btn-danger btn-lg" type="button">START NEW CAREER</button>
+            <button id="btnSavedBoard" class="btn btn-secondary btn-lg" type="button">🏆 LEADERBOARD</button>
+          </div>
+        </div>
+
+        <div class="title-features">
+          <div class="feat"><span>📅</span><b>300 Monthly Turns</b><small>25-year career arc in a 20–45 minute sitting</small></div>
+          <div class="feat"><span>⚡</span><b>4-Week Interrupts</b><small>Live breaking news, host crises &amp; event chains</small></div>
+          <div class="feat"><span>🐐</span><b>STF Absurdity</b><small>Serious station management meets Fish Rain &amp; Goat Watch</small></div>
+          <div class="feat"><span>💾</span><b>Instant Local Save</b><small>Auto-saved every month; SQLite global leaderboard</small></div>
+        </div>
+      </section>
+    </main>
+
+    <!-- =========================================================
+         MAIN GAME DASHBOARD
+         ========================================================= -->
+    <main id="screen-game" class="screen">
+      <!-- 9 Core Stats Strip -->
+      <section class="stats-rack" aria-label="Core Station Statistics">
+        <div class="stat-card" data-tooltip="Operating funds on hand. Falling below -$7,500 (or staying negative 3 consecutive months) causes Bankruptcy.">
+          <div class="stat-head"><span>💵 Cash</span><span class="delta" id="d-cash"></span></div>
+          <div class="stat-val" id="v-cash">$18,000</div>
+        </div>
+        <div class="stat-card" data-tooltip="Active regular listeners tuning in across your signal footprint. Drives sponsor payouts and unlocks new advertisers.">
+          <div class="stat-head"><span>📻 Listeners</span><span class="delta" id="d-listeners"></span></div>
+          <div class="stat-val" id="v-listeners">900</div>
+          <div class="stat-sub" id="v-listeners-cap">Cap: 4,800</div>
+        </div>
+        <div class="stat-card" data-tooltip="Market share & broadcast appeal (0–100). Falling below 2.2% for consecutive months after Month 6 risks Ratings Collapse.">
+          <div class="stat-head"><span>📈 Ratings</span><span class="delta" id="d-ratings"></span></div>
+          <div class="stat-val" id="v-ratings">14.0%</div>
+        </div>
+        <div class="stat-card" data-tooltip="Estimated market value of the station combining cash, equipment upgrades, listeners, ratings, trust, and signal reach.">
+          <div class="stat-head"><span>🏛️ Station Value</span><span class="delta" id="d-value"></span></div>
+          <div class="stat-val" id="v-value">$45,000</div>
+        </div>
+        <div class="stat-card" data-tooltip="Geographic broadcast reach (10–100%). Determines your maximum reachable audience capacity. Expand via Tower & Satellite upgrades.">
+          <div class="stat-head"><span>📡 Signal Coverage</span><span class="delta" id="d-coverage"></span></div>
+          <div class="stat-val" id="v-coverage">16%</div>
+          <div class="meter"><span id="m-coverage" style="width:16%"></span></div>
+        </div>
+        <div class="stat-card" data-tooltip="How happy your sponsors are with ratings, commercial volume, and station controversy. At 0%, Advertiser Exodus ends your career.">
+          <div class="stat-head"><span>🤝 Ad Satisfaction</span><span class="delta" id="d-adsat"></span></div>
+          <div class="stat-val" id="v-adsat">72%</div>
+          <div class="meter"><span id="m-adsat" style="width:72%"></span></div>
+        </div>
+        <div class="stat-card" data-tooltip="Community credibility and civic goodwill. Emergency coverage boosts Trust; sensational stunts erode it. At 0%, Public Trust Meltdown ends the run.">
+          <div class="stat-head"><span>🛡️ Public Trust</span><span class="delta" id="d-trust"></span></div>
+          <div class="stat-val" id="v-trust">65%</div>
+          <div class="meter"><span id="m-trust" style="width:65%"></span></div>
+        </div>
+        <div class="stat-card" data-tooltip="Federal Communications Commission compliance standing. Reckless shows & unscreened hosts cause violations and fines. At 0%, FCC Disaster shuts you down.">
+          <div class="stat-head"><span>⚖️ FCC Standing</span><span class="delta" id="d-fcc"></span></div>
+          <div class="stat-val" id="v-fcc">85%</div>
+          <div class="stat-sub" id="v-fcc-viol">Violations: 0</div>
+          <div class="meter"><span id="m-fcc" style="width:85%"></span></div>
+        </div>
+        <div class="stat-card" data-tooltip="Studio morale among your hosts and staff. Bonuses and clean studios help; overwork and bad cash hurt. At 0%, Host Revolt ends your job.">
+          <div class="stat-head"><span>😊 Staff Morale</span><span class="delta" id="d-morale"></span></div>
+          <div class="stat-val" id="v-morale">76%</div>
+          <div class="meter"><span id="m-morale" style="width:76%"></span></div>
+        </div>
+      </section>
+
+      <!-- Main Workspace Columns -->
+      <section class="workspace">
+        <div class="console-main">
+          <nav class="console-tabs" role="tablist">
+            <button class="tab-btn active" data-tab="programming" type="button">📻 Programming</button>
+            <button class="tab-btn" data-tab="staff" type="button">🎙️ Hosts &amp; Staff</button>
+            <button class="tab-btn" data-tab="advertisers" type="button">📢 Advertisers</button>
+            <button class="tab-btn" data-tab="upgrades" type="button">📡 Upgrades</button>
+            <button class="tab-btn" data-tab="rivals" type="button">⚔️ Rivals &amp; Market</button>
+            <button class="tab-btn" data-tab="office" type="button">📰 Office &amp; Strategy</button>
+          </nav>
+
+          <div id="tab-content" class="tab-panel"></div>
+        </div>
+
+        <!-- Right Sidebar: Studio Desk & Advance Turn -->
+        <aside class="console-side">
+          <div class="studio-box">
+            <div class="studio-top">
+              <div class="on-air-sign">ON AIR • <span id="sideStation">WSTF 1120 AM</span></div>
+              <div class="vu-meters" aria-hidden="true">
+                <div class="vu-row"><span>L</span><div class="vu-track"><div class="vu-fill vu-a"></div></div></div>
+                <div class="vu-row"><span>R</span><div class="vu-track"><div class="vu-fill vu-b"></div></div></div>
+              </div>
+            </div>
+
+            <div class="proj-card">
+              <h3>Projected Monthly Ledger</h3>
+              <div class="proj-row"><span>Ad Revenue</span><b class="pos" id="p-rev">$0</b></div>
+              <div class="proj-row"><span>Station Overhead &amp; Staff</span><b class="neg" id="p-exp">$0</b></div>
+              <div class="proj-row total"><span>Est. Monthly Net</span><b id="p-net">$0</b></div>
+              <div class="proj-meta">
+                <span>Proj. Ratings Target: <b id="p-rat">0%</b></span>
+                <span>Controversy: <b id="p-cont">0</b></span>
+              </div>
+            </div>
+
+            <div id="sideEraBox" class="era-tier-box">
+              <div class="era-line"><span class="lbl">ERA:</span> <b id="sideEraName">Local AM Heritage</b></div>
+              <div class="era-line"><span class="lbl">REACH:</span> <b id="sideTierName">County Coverage</b></div>
+            </div>
+
+            <div class="warnings-box" id="sideWarnings"></div>
+
+            <button id="btnAdvanceMonth" class="btn btn-advance" type="button">
+              ADVANCE MONTH ▶
+              <small id="btnAdvanceSub">Simulate 4 Broadcast Weeks</small>
+            </button>
+
+            <div class="side-quick-links">
+              <button id="btnViewLastReport" class="btn btn-sm btn-ghost hidden" type="button">📄 View Last Report</button>
+              <button id="btnRetireEarly" class="btn btn-sm btn-ghost" type="button">🏖️ Retire Early</button>
+            </div>
+          </div>
+        </aside>
+      </section>
+    </main>
+
+    <!-- =========================================================
+         MODALS
+         ========================================================= -->
+
+    <!-- New Career Modal -->
+    <div id="modal-new-career" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="newCareerTitle">
+      <div class="modal-box">
+        <div class="modal-header">
+          <h2 id="newCareerTitle">LAUNCH STATION CAREER</h2>
+          <button class="modal-close" data-close="modal-new-career" type="button" aria-label="Close">✕</button>
+        </div>
+        <form id="formNewCareer" novalidate>
+          <div class="form-group">
+            <label for="inputManagerName">Manager Name <span class="req">*Required</span></label>
+            <input id="inputManagerName" type="text" maxlength="32" placeholder="e.g., Tony" autocomplete="off" required />
+            <div id="errManagerName" class="form-error"></div>
+          </div>
+
+          <div class="form-group">
+            <label for="inputStationName">Station Call Sign</label>
+            <input id="inputStationName" type="text" maxlength="40" value="WSTF 1120 AM" autocomplete="off" />
+            <div class="preset-row">
+              <span class="preset-lbl">Quick Presets:</span>
+              <button class="preset-pill" type="button" data-preset="WSTF 1120 AM">WSTF 1120 AM</button>
+              <button class="preset-pill" type="button" data-preset="WTON 980 AM">WTON 980 AM</button>
+              <button class="preset-pill" type="button" data-preset="WKRAK 1470 AM">WKRAK 1470 AM</button>
+              <button class="preset-pill" type="button" data-preset="Radio Chicken 900 AM">Radio Chicken 900 AM</button>
+            </div>
+          </div>
+
+          <div class="modal-actions">
+            <button type="button" class="btn btn-ghost" data-close="modal-new-career">Cancel</button>
+            <button type="submit" class="btn btn-primary">🎙️ START BROADCASTING</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Confirm Overwrite Save Modal -->
+    <div id="modal-confirm-new" class="modal-backdrop hidden" role="dialog" aria-modal="true">
+      <div class="modal-box modal-sm">
+        <div class="modal-header warn">
+          <h2>⚠️ WARNING</h2>
+        </div>
+        <p class="confirm-text">
+          Starting a new career will permanently erase your current station. Continue?
+        </p>
+        <div class="modal-actions">
+          <button id="btnConfirmNo" class="btn btn-ghost" type="button">NO</button>
+          <button id="btnConfirmYes" class="btn btn-danger" type="button">YES</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Mid-Month 4-Week Simulation & Interrupt Modal -->
+    <div id="modal-simulation" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="simHeader">
+      <div class="modal-box modal-lg">
+        <div class="sim-top-bar">
+          <div>
+            <div class="sim-eyebrow">LIVE BROADCAST SIMULATION</div>
+            <h2 id="simHeader">JANUARY 1994</h2>
+          </div>
+          <div class="week-stepper">
+            <span class="wk-pill" data-wk="1">WK 1</span>
+            <span class="wk-pill" data-wk="2">WK 2</span>
+            <span class="wk-pill" data-wk="3">WK 3</span>
+            <span class="wk-pill" data-wk="4">WK 4</span>
+          </div>
+        </div>
+
+        <div id="simRunningBanner" class="sim-running">
+          <span class="spinner-dot"></span> <span id="simStatusText">Broadcasting across the dial...</span>
+        </div>
+
+        <div id="simInterruptCard" class="interrupt-card hidden">
+          <div class="interrupt-badge-row">
+            <span id="intBadge" class="int-badge">BREAKING NEWS</span>
+            <span id="intEmergencyTag" class="int-emerg hidden">⚠️ EMERGENCY BROADCAST OPPORTUNITY</span>
+          </div>
+          <div class="interrupt-head">
+            <span id="intIcon" class="int-icon">📻</span>
+            <div>
+              <h3 id="intTitle">Headline</h3>
+              <p id="intDesc">Description</p>
+            </div>
+          </div>
+          <div id="intChoices" class="int-choices"></div>
+        </div>
+
+        <div id="simLogBox" class="sim-log"></div>
+      </div>
+    </div>
+
+    <!-- Monthly Report Modal -->
+    <div id="modal-report" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="repHeader">
+      <div class="modal-box modal-lg">
+        <div class="modal-header teletype">
+          <div>
+            <div class="rep-eyebrow">STATION TELETYPE LEDGER</div>
+            <h2 id="repHeader">MARCH 1994 REPORT</h2>
+          </div>
+          <span class="rep-turn-badge" id="repTurnBadge">MONTH 3 / 300</span>
+        </div>
+
+        <div id="repDeltas" class="rep-deltas"></div>
+
+        <div class="rep-grid">
+          <div class="rep-section">
+            <h3>Broadcast Highlights &amp; Incidents</h3>
+            <ul id="repHighlights" class="rep-list"></ul>
+          </div>
+          <div class="rep-section rep-finance">
+            <h3>Monthly Financial Statement</h3>
+            <div class="fin-row"><span>Ad &amp; Sponsor Revenue</span><b class="pos" id="repAdRev">$0</b></div>
+            <div class="fin-row" id="repBonusRow"><span>Bonus Sponsor / Event Cash</span><b class="pos" id="repBonusCash">$0</b></div>
+            <div class="fin-row"><span>Operating &amp; Event Costs</span><b class="neg" id="repExp">$0</b></div>
+            <div class="fin-row" id="repFccFineRow"><span>FCC Administrative Fines</span><b class="neg" id="repFccFine">$0</b></div>
+            <div class="fin-row net"><span>Net Profit</span><b id="repNet">$0</b></div>
+          </div>
+        </div>
+
+        <div class="modal-actions">
+          <button id="btnReportNext" class="btn btn-primary btn-lg" type="button">NEXT MONTH ▶</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Endgame / Career Report Modal -->
+    <div id="modal-endgame" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="endTitle">
+      <div class="modal-box modal-lg">
+        <div class="end-banner" id="endBanner">
+          <div class="end-eyebrow">CAREER BROADCAST COMPLETE</div>
+          <h2 id="endTitle">25-YEAR STATION LEGEND</h2>
+          <p id="endReason" class="end-reason"></p>
+        </div>
+
+        <blockquote id="endBiography" class="end-bio"></blockquote>
+
+        <div id="endStatsGrid" class="end-stats-grid"></div>
+
+        <div id="submitScoreBox" class="submit-score-box">
+          <div class="submit-copy">
+            <strong>Submit Score?</strong>
+            <span id="submitIdentityPreview">Upload completed run to the Global Leaderboard.</span>
+          </div>
+          <div class="submit-controls">
+            <button id="btnSubmitScore" class="btn btn-primary" type="button">🏆 SUBMIT SCORE</button>
+          </div>
+          <div id="submitScoreStatus" class="submit-status"></div>
+        </div>
+
+        <div class="modal-actions">
+          <button id="btnEndBoard" class="btn btn-secondary" type="button">🏆 View Leaderboard</button>
+          <button id="btnEndNew" class="btn btn-primary" type="button">🎙️ Start New Career</button>
+          <button id="btnEndMenu" class="btn btn-ghost" type="button">Title Menu</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Leaderboard Modal -->
+    <div id="modal-leaderboard" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="lbTitle">
+      <div class="modal-box modal-xl">
+        <div class="modal-header">
+          <div>
+            <h2 id="lbTitle">🏆 GLOBAL BROADCAST LEADERBOARD</h2>
+            <div id="lbModeNotice" class="lb-mode-notice">Completed station careers stored via PHP + SQLite.</div>
+          </div>
+          <button class="modal-close" data-close="modal-leaderboard" type="button" aria-label="Close">✕</button>
+        </div>
+
+        <div class="lb-tabs" id="lbCategoryTabs">
+          <button class="lb-tab active" data-cat="score" type="button">Highest Score</button>
+          <button class="lb-tab" data-cat="listeners" type="button">Highest Listener Count</button>
+          <button class="lb-tab" data-cat="value" type="button">Highest Station Value</button>
+          <button class="lb-tab" data-cat="longest" type="button">Longest Career</button>
+          <button class="lb-tab" data-cat="fcc" type="button">Most FCC Violations Survived</button>
+        </div>
+
+        <div class="lb-table-wrap">
+          <table class="lb-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Manager</th>
+                <th>Station</th>
+                <th id="lbPrimaryCol">Score</th>
+                <th>Years</th>
+                <th>Outcome</th>
+                <th>Date</th>
+              </tr>
+            </thead>
+            <tbody id="lbBody"></tbody>
+          </table>
+          <div id="lbMessage" class="lb-message">Loading leaderboard...</div>
+        </div>
+
+        <div class="modal-actions">
+          <button id="btnLbRefresh" class="btn btn-ghost" type="button">↻ Refresh</button>
+          <button class="btn btn-primary" data-close="modal-leaderboard" type="button">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/events_expansion.js"></script>
+  <script src="js/data.js"></script>
+  <script src="js/audio.js"></script>
+  <script src="js/engine.js"></script>
+  <script src="js/ui.js"></script>
+</body>
+</html>
